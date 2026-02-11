@@ -1,0 +1,32 @@
+
+name: Auto Close Issues
+
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  close-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+    - name: Close issue based on label
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          const issue = context.issue;
+          const labels = context.payload.issue.labels;
+
+          const hasCompletedLabel = labels.some(label => label.name === 'completed');
+          const hasWontfixLabel = labels.some(label => label.name === 'wontfix');
+
+          if (hasCompletedLabel || hasWontfixLabel) {
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              state: 'closed'
+            });
+          }
