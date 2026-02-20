@@ -1,22 +1,22 @@
 
 name: Auto Close Labeled Issues
+
 on:
   issues:
-    types: [opened, labeled]
+    types: [labeled]
 
 jobs:
   close-issue:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Close issue on 'completed' or 'wontfix' label
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_URL: ${{ github.event.issue.html_url }}
-        run: |
-          sleep 10
-          if gh issue view $ISSUE_URL --json labels --jq '.labels.[].name' | grep -qE '^(completed|wontfix)$'; then
-            gh issue close $ISSUE_URL
-          fi
+    - name: Close issue if labeled 'completed' or 'wontfix'
+      if: github.event.label.name == 'completed' || github.event.label.name == 'wontfix'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.update({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            state: 'closed'
+          })
