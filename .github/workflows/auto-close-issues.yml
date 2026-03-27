@@ -2,8 +2,7 @@
 name: Auto Close Labeled Issues
 on:
   issues:
-    types:
-      - labeled
+    types: [opened, labeled]
 jobs:
   auto-close:
     runs-on: ubuntu-latest
@@ -12,13 +11,14 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const label = context.payload.label.name;
-            if (label === 'completed' || label === 'wontfix') {
+            const issue = context.payload.issue;
+            const labels = issue.labels.map(label => label.name);
+            if (labels.includes('completed') || labels.includes('wontfix')) {
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: context.issue.number,
+                issue_number: issue.number,
                 state: 'closed'
               });
-              console.log(`Issue #${context.issue.number} closed because it was labeled with '${label}'.`);
+              console.log(`Issue #${issue.number} closed because it has one of the target labels.`);
             }
