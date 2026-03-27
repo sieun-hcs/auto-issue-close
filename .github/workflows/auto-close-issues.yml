@@ -8,6 +8,8 @@ on:
 jobs:
   close-issue:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Close issue when labeled 'completed' or 'wontfix'
         if: github.event.label.name == 'completed' || github.event.label.name == 'wontfix'
