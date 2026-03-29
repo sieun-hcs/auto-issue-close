@@ -1,24 +1,14 @@
-
-name: Auto Close Issues
-
+name: Close Labeled Issues
 on:
   issues:
-    types: [labeled]
-
+    types:
+      - labeled
 jobs:
   close-issue:
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
     steps:
-      - name: Close issue when labeled 'completed' or 'wontfix'
-        if: github.event.label.name == 'completed' || github.event.label.name == 'wontfix'
-        uses: actions/github-script@v6
+      - name: Close issue
+        uses: actions/close-issue@v4
         with:
-          script: |
-            github.rest.issues.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              state: 'closed'
-            })
+          labels: completed,wontfix
+          comment: 'This issue was automatically closed because it was labeled as "completed" or "wontfix".'
