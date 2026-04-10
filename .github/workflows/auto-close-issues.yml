@@ -1,20 +1,23 @@
 
-name: Auto Close Labeled Issues
+name: Auto-close issues
 on:
   issues:
-    types: [labeled]
+    types:
+      - labeled
+  schedule:
+    - cron: '0 * * * *' # Runs every hour
+
 jobs:
-  close-issue:
+  close-issues:
     runs-on: ubuntu-latest
     steps:
-      - name: Close issue
-        if: github.event.label.name == 'completed' || github.event.label.name == 'wontfix'
+      - name: Close issues labeled as 'completed' or 'wontfix'
         uses: actions/stale@v4
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          stale-issue-message: "This issue was automatically closed because it has been labeled as 'completed' or 'wontfix'."
+          stale-issue-message: 'This issue is being automatically closed because it has been labeled as completed or wontfix.'
           days-before-stale: -1
           days-before-close: -1
-          stale-issue-label: "stale"
-          exempt-issue-labels: ""
-          close-issue-reason: "completed"
+          stale-issue-label: 'completed,wontfix'
+          exempt-issue-labels: 'bug'
+          only-labels: 'completed,wontfix'
